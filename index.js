@@ -2,42 +2,53 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-
 import authRoutes from "./routes/authRoutes.js";
-import contactRoutes from "./routes/contactRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 const app = express();
 
-// ✅ CORS setup (sirf apne frontend ko allow karne ke liye)
+// ✅ Allowed origins list
+const allowedOrigins = [
+  "http://localhost:5173", 
+  "https://subtle-donut-ac0f7f.netlify.app",   // tera current frontend
+  "https://virtualdesk-app-fa48a0.netlify.app" // pehla frontend link (extra)
+];
+
+// ✅ CORS setup
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "virtualdesk-app-fa48a0.netlify.app", // Netlify ka URL 
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
-// Middleware
 app.use(express.json());
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/contact", contactRoutes);
-app.use("/api/users", userRoutes);
+// Root route - simple health check
+app.get("/", (req, res) => res.send("🚀 Backend is running successfully!"));
 
-// PORT from env (Render apna port set karta hai)
+// Test route
+app.get("/api/test", (req, res) => res.json({ message: "API working fine ✅" }));
+
+// Auth routes
+app.use("/api/auth", authRoutes);
+
+// PORT setup for Render
 const PORT = process.env.PORT || 5000;
 
-// ✅ MongoDB Atlas connection
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+// Connect to MongoDB and start server
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => {
-    app.listen(PORT, () =>
-      console.log(`✅ Server running on http://localhost:${PORT}`)
-    );
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🌐 Test route: http://localhost:${PORT}/api/test`);
+    });
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
