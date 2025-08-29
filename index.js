@@ -9,9 +9,9 @@ const app = express();
 
 // ✅ Allowed origins list
 const allowedOrigins = [
-  "http://localhost:5173", 
-  "https://subtle-donut-ac0f7f.netlify.app",   // tera current frontend
-  "https://virtualdesk-app-fa48a0.netlify.app" // pehla frontend link (extra)
+  "http://localhost:5173",
+  "https://subtle-donut-ac0f7f.netlify.app",
+  "https://virtualdesk-app-fa48a0.netlify.app",
 ];
 
 // ✅ CORS setup
@@ -28,21 +28,22 @@ app.use(
   })
 );
 
+// ✅ Body parser
 app.use(express.json());
 
-// Root route - simple health check
+// ✅ Root route - health check
 app.get("/", (req, res) => res.send("🚀 Backend is running successfully!"));
 
-// Test route
+// ✅ Test route (yaha pe rakhna authRoutes se **pehle** ya baad, dono kaam karega)
 app.get("/api/test", (req, res) => res.json({ message: "API working fine ✅" }));
 
-// Auth routes
+// ✅ Auth routes
 app.use("/api/auth", authRoutes);
 
 // PORT setup for Render
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB and start server
+// ✅ Connect MongoDB and start server
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
